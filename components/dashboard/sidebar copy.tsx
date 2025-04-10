@@ -15,7 +15,8 @@ export default function Sidebar({ activeTab, setActiveTab, user }: SidebarProps)
   const router = useRouter();
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home size={20}/>, isadmin: false, href: "#" },
-    // { id: "editProfile", label: "Edit Profil", icon: <UserPen size={20}/>, isadmin: false, href: "#" },
+    { id: "editProfile", label: "Edit Profil", icon: <UserPen size={20}/>, isadmin: false, href: "#" },
+    { id: "createArticle", label: "Buat Artikel", icon: <Plus size={20}/>, isadmin: false, href: "#" },
     { id: "datauser", label: "Data User", icon: <Users size={20}/>, isadmin: true, href: "dashboard/user" },
     { id: "datarole", label: "Data Role", icon: <UserCog size={20}/>, isadmin: true, href: "dashboard/role" },
     { id: "dataartikel", label: "Data Artikel", icon: <Newspaper size={20}/>, isadmin: true, href: "dashboard/artikel" },
@@ -45,10 +46,14 @@ export default function Sidebar({ activeTab, setActiveTab, user }: SidebarProps)
             <Link
               key={item.id}
               className={`sidebar-nav-item ${activeTab === item.id ? "active" : ""}`}
-              href={"#"}
+              href={item.href =="#" ? "/dashboard" : item.href}
               onClick={(e) => {
+                if(item.href == null || item.href == "#") {
                   e.preventDefault()
                   setActiveTab(item.id)
+                } else {
+                  router.push(item.href)
+                }
               }}
             >
               <span className="mr-1">{item.icon}</span>
@@ -58,16 +63,16 @@ export default function Sidebar({ activeTab, setActiveTab, user }: SidebarProps)
         </nav>
       </div>
       <div className="sidebar-footer">
+        <button type="button" onClick={handleLogout} className="sidebar-nav-item w-full">
+          <span className="mr-1"><DoorOpen size={20}/></span>
+          
+          Logout
+        </button>
         <Link href="/" className="sidebar-nav-item">
           <span className="mr-1"><ArrowLeft size={20}/></span>
           
           Kembali ke Beranda
         </Link>
-        <button type="button" onClick={handleLogout} className="sidebar-nav-item w-full">
-          <span className="mr-1"><DoorOpen size={20}/></span>
-          
-          Keluar
-        </button>
       </div>
     </div>
   )

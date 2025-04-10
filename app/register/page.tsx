@@ -1,18 +1,40 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type React from "react"
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import AuthLayout from "@/components/auth-layout"
+import { Register } from "@/lib/Authenticate"
+import { useAuth } from "@/lib/useAuth"
+import Loading from "@/components/ui/Loading"
 
 export default function RegisterPage() {
   const router = useRouter()
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    passwordconfirmation: ""
   })
+  const {user, loading} = useAuth();
+  const [loadingPage, setLoadingPage] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+
+    if(!loading) {
+      setLoadingPage(false)
+    }
+  }, [user, router, loading]);
+
+  if(loadingPage) {
+    return <Loading text="Memuat..."/>
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -22,19 +44,32 @@ export default function RegisterPage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically handle registration
-    console.log("Registration data:", formData)
 
-    // For demo purposes, just redirect to login
-    router.push("/login")
+    if(formData.password != formData.passwordconfirmation) {
+      setError("Kata sandi tidak sama");
+      return;
+    }
+    
+    const register = await Register(formData);
+
+    if(!register.status || !register.success) {
+      setError(register.pesan || register.message);
+    }
+
+    if(register.status || register.success) {
+      setSuccess(register.pesan || register.message)
+      router.push('/login');
+    }
   }
 
   return (
     <AuthLayout>
       <div className="auth-forms-container">
         <h2>Buat Akun Baru</h2>
+        <p className="mb-2 text-red-500 text-center">{error}</p>
+        <p className="mb-2 text-green-500 text-center">{success}</p>
         <form onSubmit={handleSubmit} className="auth-form active">
           <div className="form-group">
             <label htmlFor="name" className="form-label">
@@ -44,7 +79,7 @@ export default function RegisterPage() {
               type="text"
               id="name"
               name="name"
-              className="form-input"
+              className="form-input bg-gray-800"
               placeholder="Masukkan nama lengkap"
               value={formData.name}
               onChange={handleChange}
@@ -59,7 +94,7 @@ export default function RegisterPage() {
               type="email"
               id="email"
               name="email"
-              className="form-input"
+              className="form-input bg-gray-800"
               placeholder="Masukkan email"
               value={formData.email}
               onChange={handleChange}
@@ -74,9 +109,24 @@ export default function RegisterPage() {
               type="password"
               id="password"
               name="password"
-              className="form-input"
+              className="form-input bg-gray-800"
               placeholder="Masukkan kata sandi"
               value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="passwordconfirmation" className="form-label">
+              Kata Sandi
+            </label>
+            <input
+              type="password"
+              id="passwordconfirmation"
+              name="passwordconfirmation"
+              className="form-input bg-gray-800"
+              placeholder="Masukkan kata sandi"
+              value={formData.passwordconfirmation}
               onChange={handleChange}
               required
             />

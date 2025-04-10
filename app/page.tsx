@@ -4,6 +4,7 @@ import TrendingSection from "@/components/trending-section"
 import LatestPopularSection from "@/components/latest-popular-section"
 import CategoriesSection from "@/components/categories-section"
 import Footer from "@/components/footer"
+import Loading from "@/components/ui/Loading"
 
 export default function Home() {
   return (
@@ -14,7 +15,7 @@ export default function Home() {
           <HeroSection />
           <TrendingSection />
           <LatestPopularSection />
-          <CategoriesSection />
+          {/* <CategoriesSection /> Karena Diatas Sudah Menampilkan Kategori */}
         </div>
       </main>
       <Footer />

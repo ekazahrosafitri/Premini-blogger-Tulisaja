@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react"
+import { KategoriType } from "@/lib/typedata"
+import { semuaKategori } from "@/lib/backend/Kategori"
 
 export default function Footer() {
   const [socialLinks] = useState([
@@ -12,13 +14,16 @@ export default function Footer() {
     { icon: Youtube, url: "#" },
   ])
 
-  const [categories] = useState([
-    { name: "Politik", url: "/category/politik" },
-    { name: "Ekonomi", url: "/category/ekonomi" },
-    { name: "Teknologi", url: "/category/teknologi" },
-    { name: "Olahraga", url: "/category/olahraga" },
-    { name: "Hiburan", url: "/category/hiburan" },
-  ])
+  // const [categories] = useState([
+  //   { name: "Politik", url: "/category/politik" },
+  //   { name: "Ekonomi", url: "/category/ekonomi" },
+  //   { name: "Teknologi", url: "/category/teknologi" },
+  //   { name: "Olahraga", url: "/category/olahraga" },
+  //   { name: "Hiburan", url: "/category/hiburan" },
+  // ])
+
+  const [categories, setCategories] = useState<KategoriType[] | []>([]);
+
 
   const [links] = useState([
     { name: "Tentang Kami", url: "/about" },
@@ -27,6 +32,15 @@ export default function Footer() {
     { name: "Syarat & Ketentuan", url: "/terms" },
     { name: "Peta Situs", url: "/sitemap" },
   ])
+
+  useEffect(() => {
+    async function getKategoris() {
+      const kategori: KategoriType[] = await semuaKategori({})
+      setCategories(kategori)
+    }
+
+    getKategoris();
+  }, [])
 
   return (
     <footer className="footer">
@@ -51,7 +65,7 @@ export default function Footer() {
             <ul className="footer-links">
               {categories.map((category, index) => (
                 <li key={index}>
-                  <Link href={category.url}>{category.name}</Link>
+                  <Link href={`/artikels?kategori=${category.id}`}>{category.kategori}</Link>
                 </li>
               ))}
             </ul>
@@ -70,7 +84,7 @@ export default function Footer() {
       </div>
       <div className="footer-bottom">
         <div className="container">
-          <p>&copy; {new Date().getFullYear()} TulisAja. Hak Cipta Dilindungi.</p>
+          <p>&copy; {new Date().getFullYear()} TulisAja.</p>
         </div>
       </div>
     </footer>

@@ -6,9 +6,9 @@ import Image from "next/image"
 
 export default function EditProfile() {
   const [profileData, setProfileData] = useState({
-    name: "Kevin Heart",
-    username: "@kevinhartuy",
-    about: "Discuss only on work hour, unless you wanna discuss about music 🎵",
+    name: "",
+    username: "",
+    about: "",
   })
 
   const [profileImage, setProfileImage] = useState(
@@ -74,23 +74,24 @@ export default function EditProfile() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Profile Name</label>
-            <input type="text" name="name" className="form-input" value={profileData.name} onChange={handleChange} />
+            <input type="text" name="name" className="form-input bg-black" placeholder="Name" value={profileData.name} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label className="form-label">Username</label>
-            <input type="text" name="username" className="form-input disabled" value={profileData.username} disabled />
+            <input type="text" name="username" className="form-input disabled" placeholder="Username" value={profileData.username} disabled />
           </div>
           <div className="form-group">
             <label className="form-label">About Me</label>
             <textarea
               name="about"
-              className="form-input"
+              placeholder="About me"
+              className="form-input bg-black"
               rows={4}
               value={profileData.about}
               onChange={handleChange}
             ></textarea>
           </div>
-          <button type="submit" className={`btn btn-secondary ${!isChanged ? "disabled" : ""}`} disabled={!isChanged}>
+          <button type="submit" className={`btn btn-secondary`} >
             Save changes
           </button>
         </form>

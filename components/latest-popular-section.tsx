@@ -1,122 +1,103 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { ArtikelType } from "@/lib/typedata"
+import Helper from "@/lib/Helper"
 
 export default function LatestPopularSection() {
-  const [latestItems] = useState([
-    {
-      id: 1,
-      image: "https://via.placeholder.com/300x200",
-      category: "Politik",
-      title: "DPR Setujui Rancangan Undang-Undang Energi Terbarukan",
-      excerpt:
-        "Dewan Perwakilan Rakyat (DPR) akhirnya menyetujui Rancangan Undang-Undang tentang Energi Terbarukan yang telah diajukan sejak tahun lalu.",
-      author: "Admin",
-      date: "15 Maret 2025",
-    },
-    {
-      id: 2,
-      image: "https://via.placeholder.com/300x200",
-      category: "Ekonomi",
-      title: "Bank Indonesia Pertahankan Suku Bunga Acuan di Level 4.75%",
-      excerpt:
-        "Bank Indonesia (BI) memutuskan untuk mempertahankan suku bunga acuan atau BI Rate di level 4,75% dalam Rapat Dewan Gubernur (RDG).",
-      author: "Admin",
-      date: "14 Maret 2025",
-    },
-    {
-      id: 3,
-      image: "https://via.placeholder.com/300x200",
-      category: "Teknologi",
-      title: "Startup Lokal Raih Pendanaan Seri B Senilai Rp500 Miliar",
-      excerpt:
-        "Sebuah startup teknologi finansial (fintech) asal Indonesia berhasil mendapatkan pendanaan Seri B senilai Rp500 miliar dari sejumlah investor global.",
-      author: "Admin",
-      date: "13 Maret 2025",
-    },
-  ])
+  const [data, setData] = useState<ArtikelType[] | null>([]);
+  const [dataPop, setDataPop] = useState<ArtikelType[] | null>([]);
 
-  const [popularItems] = useState([
-    {
-      id: 1,
-      number: "01",
-      title: "Warga Keluhkan Kenaikan Harga Sembako di Beberapa Daerah",
-    },
-    {
-      id: 2,
-      number: "02",
-      title: "Kementerian PUPR Resmikan Jalan Tol Baru Sepanjang 50 KM",
-    },
-    {
-      id: 3,
-      number: "03",
-      title: "Film Karya Anak Bangsa Raih Penghargaan di Festival Film Internasional",
-    },
-    {
-      id: 4,
-      number: "04",
-      title: "Ini Daftar 10 Universitas Terbaik di Indonesia Tahun 2025",
-    },
-    {
-      id: 5,
-      number: "05",
-      title: "Pemerintah Luncurkan Program Bantuan untuk UMKM Terdampak Pandemi",
-    },
-  ])
+  let dataKirim = {
+    limit: 5
+  }
+
+  let dataKirimIndex = {
+    start: 0,
+    end: 5,
+  }
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/artikel/populer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-HTTP-Method-Override": "GET"
+      },
+      body: JSON.stringify(dataKirim),
+    })
+    .then((res) => res.json())
+    .then(({data}) => setDataPop(data))
+    .catch(err => console.error(err))
+
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/artikel`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-HTTP-Method-Override": "GET"
+      },
+      body: JSON.stringify(dataKirimIndex),
+    })
+    .then((res) => res.json())
+    .then(({data}) => setData(data))
+    .catch(err => console.error(err))
+  }, []);
 
   return (
     <div className="two-column-layout">
       {/* Latest News */}
       <section className="latest-section section">
         <div className="section-header">
-          <h2 className="section-title">Berita Terbaru</h2>
-          <Link href="/category/latest" className="view-all">
+          <h2 className="section-title font-bold">Berita Terbaru</h2>
+          <Link href="/artikels" className="view-all">
             Lihat Semua
           </Link>
         </div>
         <div className="latest-list">
-          {latestItems.map((item) => (
-            <div key={item.id} className="latest-item">
+          {data && data.length != 0 ? data.map((item) => (
+            <a href={`/detailartikel/${item.id}`} key={item.id} className="latest-item">
               <div className="latest-image">
                 <Image
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.title}
+                  src={process.env.NEXT_PUBLIC_BASE_URL_IMAGE + item.banner || "/artikels/artikel.jpeg"}
+                  alt={item.judul_artikel}
                   width={300}
                   height={200}
-                  layout="responsive"
+                  // layout="responsive"
                 />
               </div>
               <div className="latest-content">
-                <span className="news-category">{item.category}</span>
-                <h3 className="latest-title">{item.title}</h3>
-                <p className="latest-excerpt">{item.excerpt}</p>
+                <span className="news-category">{item.kategori?.kategori}</span>
+                <h3 className="latest-title font-bold">{item.judul_artikel}</h3>
+                <p className="latest-excerpt">{Helper.potongText(Helper.hilangkanHTMLTAG(item.isi), 100)}</p>
                 <div className="news-meta">
-                  <span>Oleh: {item.author}</span>
-                  <span>{item.date}</span>
+                  <span>Oleh: {item.user?.name}</span>
+                  <span>{Helper.dateConvert(item.created_at)}</span>
                 </div>
               </div>
-            </div>
-          ))}
+            </a>
+          )) : <div className="text-center w-full"><h1 className="font-bold text-xl">Data Artikel Tidak Ada</h1></div>}
         </div>
       </section>
 
       {/* Popular News */}
       <section className="popular-section section">
         <div className="section-header">
-          <h2 className="section-title">Terpopuler</h2>
-          <Link href="/category/popular" className="view-all">
+          <h2 className="section-title font-bold">Terpopuler</h2>
+          <Link href="/artikels" className="view-all">
             Lihat Semua
           </Link>
         </div>
         <div className="popular-list">
-          {popularItems.map((item) => (
-            <div key={item.id} className="popular-item">
-              <div className="popular-number">{item.number}</div>
-              <h3 className="popular-title">{item.title}</h3>
-            </div>
-          ))}
+          {dataPop && dataPop.length != 0 ? dataPop.map((item, index) => (
+            <a href={`/detailartikel/${item.id}`} key={item.id} className="popular-item">
+              <div className="popular-number">{(index + 1).toString().padStart(2, "0")}</div>
+              <h3 className="popular-title font-semibold">{item.judul_artikel}</h3>
+            </a>
+          )) : <div className="text-center w-full"><h1 className="font-bold text-xl">Data Artikel Tidak Ada</h1></div>}
         </div>
       </section>
     </div>

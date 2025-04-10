@@ -1,69 +1,61 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { ArtikelType } from "@/lib/typedata"
+import Helper from "@/lib/Helper"
 
 export default function TrendingSection() {
-  const [trendingItems] = useState([
-    {
-      id: 1,
-      image: "https://placehold.co/100x80",
-      category: "Ekonomi",
-      title: "Inflasi Turun ke Level Terendah dalam 5 Tahun Terakhir",
-      date: "15 Maret 2025",
-    },
-    {
-      id: 2,
-      image: "https://placehold.co/100x80",
-      category: "Teknologi",
-      title: "Perusahaan Lokal Luncurkan Smartphone dengan Fitur AI Terbaru",
-      date: "14 Maret 2025",
-    },
-    {
-      id: 3,
-      image: "https://placehold.co/100x80",
-      category: "Olahraga",
-      title: "Tim Nasional Indonesia Melaju ke Semifinal Piala AFF 2025",
-      date: "13 Maret 2025",
-    },
-    {
-      id: 4,
-      image: "https://placehold.co/100x80",
-      category: "Pendidikan",
-      title: "Pemerintah Revisi Kurikulum Pendidikan untuk Tingkatkan Kualitas SDM",
-      date: "12 Maret 2025",
-    },
-  ])
+  const [data, setData] = useState<ArtikelType[] | null>([]);
+
+  let dataKirim = {
+    limit: 5
+  }
+
+  useEffect(() => {
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/artikel/trending`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-HTTP-Method-Override": "GET"
+        },
+        body: JSON.stringify(dataKirim)
+      })
+      .then((res) => res.json())
+      .then(({data}) => setData(data))
+      .catch(err => console.error(err))
+    }, []);
 
   return (
     <section className="trending-section section">
       <div className="section-header">
-        <h2 className="section-title">Trending</h2>
-        <Link href="/category/trending" className="view-all">
+        <h2 className="section-title font-bold">Trending 24 Jam</h2>
+        <Link href="/artikels" className="view-all">
           Lihat Semua
         </Link>
       </div>
       <div className="trending-list">
-        {trendingItems.map((item) => (
-          <div key={item.id} className="trending-item">
-              { item.image }
+        {data && data.length != 0 ? data.map((item) => (
+          <a href={`/detailartikel/${item.id}`} key={item.id} className="trending-item">
             <div className="trending-image">
               <Image
-                src={item.image || "/placeholder.svg"}
-                alt={item.title}
-                width={100}
-                height={80}
-                layout="responsive"
+                src={process.env.NEXT_PUBLIC_BASE_URL_IMAGE + item.banner || "/artikels/artikel.jpeg"}
+                alt={item.judul_artikel}
+                width={1000}
+                height={800}
+                // layout="responsive"
+                className="w-full h-full object-cover"
               />
             </div>
             <div className="trending-content">
-              <span className="trending-category">{item.category}</span>
-              <h3 className="trending-title">{item.title}</h3>
-              <div className="trending-date">{item.date}</div>
+              <span className="trending-category font-medium">{item.kategori?.kategori}</span>
+              <h3 className="trending-title font-semibold">{item.judul_artikel}</h3>
+              <div className="trending-date">{Helper.dateConvert(item.created_at)}</div>
             </div>
-          </div>
-        ))}
+          </a>
+        )) : <div className="text-center w-full"><h1 className="font-bold text-2xl">Data Artikel Tidak Ada</h1></div>}
       </div>
     </section>
   )
