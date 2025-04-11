@@ -14,7 +14,6 @@ export default function CreateArticle() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    // Clean up the URL when component unmounts or when a new file is selected
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl)
@@ -43,7 +42,6 @@ export default function CreateArticle() {
         image: file,
       }))
 
-      // Create a preview URL for the image
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl)
       }
@@ -62,7 +60,6 @@ export default function CreateArticle() {
         image: file,
       }))
 
-      // Create a preview URL for the image
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl)
       }
@@ -82,11 +79,9 @@ export default function CreateArticle() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
     console.log("Article data:", formData)
     alert("Article submitted successfully!")
 
-    // Reset form
     setFormData({
       title: "",
       content: "",
@@ -106,45 +101,58 @@ export default function CreateArticle() {
   }
 
   return (
-    <div className="create-article">
-      <h3 className="create-article-title">Create an Offer</h3>
+    <div className="w-full px-3 sm:px-6 py-6 max-w-md mx-auto sm:max-w-lg md:max-w-2xl">
+      <h3 className="text-lg sm:text-xl font-bold mb-6 text-gray-800 text-center sm:text-left">Create an Offer</h3>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* File Upload Area */}
         <div
-          className={`file-upload-area ${isDragging ? "dragging" : ""}`}
+          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+            isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
           {!previewUrl ? (
-            <>
-              <i className="fas fa-plus upload-icon"></i>
-              <button type="button" className="upload-btn" onClick={triggerFileInput}>
+            <div className="space-y-3">
+              <i className="fas fa-plus text-2xl text-gray-400"></i>
+              <button
+                type="button"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
+                onClick={triggerFileInput}
+              >
                 Upload File (jpg, jpeg, png)
               </button>
               <input
                 type="file"
                 ref={fileInputRef}
-                className="hidden-file-input"
+                className="hidden"
                 accept=".jpg,.jpeg,.png"
                 onChange={handleFileChange}
               />
-              <p className="upload-text">or drag and drop files to upload</p>
-              <p className="upload-size-text">Recommended size: 300x250px</p>
-            </>
+              <p className="text-xs text-gray-500">or drag and drop files to upload</p>
+              <p className="text-xs text-gray-400">Recommended size: 300x250px</p>
+            </div>
           ) : (
-            <div className="file-preview">
-              <div className="preview-image-container">
-                <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="preview-image" />
+            <div className="space-y-3">
+              <div className="flex justify-center">
+                <img 
+                  src={previewUrl || "/placeholder.svg"} 
+                  alt="Preview" 
+                  className="max-h-48 w-auto rounded-md object-contain"
+                />
               </div>
-              <div className="preview-actions">
-                <p>Selected file: {formData.image?.name}</p>
+              <div className="flex flex-col items-center space-y-2">
+                <p className="text-xs text-gray-600 truncate w-full text-center">
+                  Selected: {formData.image?.name}
+                </p>
                 <button
                   type="button"
-                  className="btn btn-danger btn-sm"
+                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   onClick={() => {
                     setFormData((prev) => ({ ...prev, image: null }))
-                    URL.revokeObjectURL(previewUrl)
+                    URL.revokeObjectURL(previewUrl!)
                     setPreviewUrl(null)
                   }}
                 >
@@ -155,34 +163,41 @@ export default function CreateArticle() {
           )}
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Judul</label>
+        {/* Title Input */}
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">Judul</label>
           <input
             type="text"
             name="title"
-            className="form-input"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
             placeholder="Tambahkan judul"
             value={formData.title}
             onChange={handleChange}
             maxLength={110}
           />
-          <p className="char-count">{charCount}/110</p>
+          <p className="text-xs text-gray-500 text-right">{charCount}/110</p>
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Isi artikel anda</label>
+        {/* Content Textarea */}
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">Isi artikel anda</label>
           <textarea
             name="content"
-            className="form-input"
-            placeholder=""
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            placeholder="Tulis isi artikel di sini..."
             value={formData.content}
             onChange={handleChange}
-            rows={6}
+            rows={5}
           ></textarea>
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={!formData.title || !formData.content}>
+        {/* Submit Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            disabled={!formData.title || !formData.content}
+          >
             Submit Offer
           </button>
         </div>
@@ -190,4 +205,3 @@ export default function CreateArticle() {
     </div>
   )
 }
-
